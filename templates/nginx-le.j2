@@ -26,10 +26,16 @@ server {
     ssl_dhparam /etc/nginx/dhparams.pem;
     ssl_prefer_server_ciphers on;
 
+{% if reverse_proxy is true %}
+	location /{{ proxy_path }} {
+          proxy_pass http://{{ backend_server }}:{{ backend_server_port }};
+    }
+{% else %}
     root /var/www/{{ domain_name }};
     index index.html index.htm;
 
     location / {
         try_files $uri $uri/ =404;
     }
+{% endif %}
 }
