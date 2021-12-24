@@ -1,8 +1,6 @@
 --- 
 
-letsencrypt_email: foo@example.com
-domain_name: example.com
-reverse_proxy: false
-proxy_path: ""
-backend_server: 127.0.0.1
-backend_server_port: 8080
+nginx_letsencrypt_email: foo@example.com
+nginx_domain_name: example.com
+nginx_reverse_proxy: false
+nginx_reverse_hosts: []
