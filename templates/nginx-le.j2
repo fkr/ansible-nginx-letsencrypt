@@ -26,12 +26,14 @@ server {
     ssl_dhparam /etc/nginx/dhparams.pem;
     ssl_prefer_server_ciphers on;
 
-{% if reverse_proxy is true %}
-	location /{{ proxy_path }} {
-          proxy_pass http://{{ backend_server }}:{{ backend_server_port }};
+{% if nginx_reverse_proxy is true %}
+    {% for proxy in nginx_reverse_hosts %}
+    location /{{ proxy.path }} {
+      proxy_pass {{ proxy.protocol }}://{{ proxy.host }}:{{ proxy.port }};
     }
+    {% endfor %}
 {% else %}
-    root /var/www/{{ domain_name }};
+    root /var/www/{{ nginx_domain_name }};
     index index.html index.htm;
 
     location / {
