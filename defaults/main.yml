@@ -1,6 +1,4 @@
 --- 
 
 nginx_letsencrypt_email: foo@example.com
-nginx_domain_name: example.com
-nginx_reverse_proxy: false
-nginx_reverse_hosts: []
+nginx_single_cert: true

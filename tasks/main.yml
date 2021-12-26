@@ -28,13 +28,17 @@
   service:
     name: nginx
     state: restarted
-- name: Create letsencrypt certificate
+- name: Create letsencrypt combined certificate
   shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ nginx_hosts | map(attribute='domain_name') | join(',')  }}"
-  register: command_output
   args:
    creates: "/etc/letsencrypt/live/{{ nginx_hosts | map(attribute='domain_name') | first }}"
-- debug:
-    var: command_output.stdout_lines
+  when: nginx_single_cert
+- name: Create letsencrypt standalone certificate
+  shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ item }}"
+  loop: "{{ nginx_hosts | map(attribute='domain_name') }}"
+  args:
+   creates: "/etc/letsencrypt/live/{{ item }}"
+  when: not nginx_single_cert
 - name: Generate dhparams
   shell: openssl dhparam -out /etc/nginx/dhparams.pem 2048
   args:
@@ -45,8 +49,16 @@
     dest: /etc/nginx/sites-enabled/le
 - name: Reload nginx to activate specified site
   service: name=nginx state=restarted
-- name: Add letsencrypt cronjob for cert renewal
+- name: Add letsencrypt cronjob for combined cert renewal
   cron:
    name: letsencrypt_renewal
    special_time: weekly
    job: letsencrypt --renew certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ nginx_hosts | map(attribute='domain_name') | join(',') }}" && service nginx reload
+  when: nginx_single_cert
+- name: Add letsencrypt cronjob for standalone cert renewal
+  cron:
+   name: letsencrypt_renewal
+   special_time: weekly
+   job: letsencrypt --renew certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ domain_name }}" && service nginx reload
+  loop: "{{ nginx_hosts | map(attribute='domain_name') }}"
+  when: not nginx_single_cert

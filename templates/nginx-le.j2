@@ -12,9 +12,15 @@ server {
     listen 0.0.0.0:443 ssl{% if nginx_host.default is defined and nginx_host.default is sameas true %} default{% endif %};
     server_name {{ nginx_host.domain_name }};
 
+{% if nginx_single_cert is defined and nginx_single_cert is sameas true %}
     ssl_certificate         /etc/letsencrypt/live/{{ nginx_hosts | map(attribute='domain_name') | first }}/fullchain.pem;
     ssl_certificate_key     /etc/letsencrypt/live/{{ nginx_hosts | map(attribute='domain_name') | first }}/privkey.pem;
     ssl_trusted_certificate /etc/letsencrypt/live/{{ nginx_hosts | map(attribute='domain_name') | first }}/fullchain.pem;
+{% else %}
+    ssl_certificate         /etc/letsencrypt/live/{{ nginx_host.domain_name }}/fullchain.pem;
+    ssl_certificate_key     /etc/letsencrypt/live/{{ nginx_host.domain_name }}/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/{{ nginx_host.domain_name }}/fullchain.pem;
+{% endif %}
 
     ssl_session_cache shared:SSL:50m;
     ssl_session_timeout 5m;
