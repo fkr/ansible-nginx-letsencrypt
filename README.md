@@ -21,40 +21,42 @@ Example set of variables:
 
 
 ```
-   nginx_letsencrypt_email: "le@example.com"
-   nginx_hosts: [
+  nginx_letsencrypt_email: "le@example.com"
+  nginx_hosts: [
+    {
+      default: true,
+      domain_name: "abcde.example.com",
+      reverse_hosts: [ 
         {
-		    default: true,
-            reverse_proxy: true,
-            domain_name: "abcde.example.com",
-            reverse_hosts: [ 
-              {
-                protocol: "http",
-                path: "",
-                host: "127.0.0.1",
-                port: "8080"
-              },
-              {
-                protocol: "http",
-                path: "/foo",
-                host: "127.0.0.1",
-                port: "8090"
-              }
-           ]
+          protocol: "http",
+          path: "",
+          host: "127.0.0.1",
+          port: "8080"
         },
         {
-		    default: false,
-            reverse_proxy: true,
-            domain_name: "edcba.example.com",
-            reverse_hosts: [ 
-              {
-                protocol: "http",
-                path: "/foobar",
-                host: "127.0.0.1",
-                port: "9000"
-              }
-           ]
+          protocol: "http",
+          path: "/foo",
+          host: "127.0.0.1",
+          port: "8090"
         }
-   ]
+      ]
+    },
+    {
+      default: false,
+      domain_name: "edcba.example.com",
+      reverse_hosts: [ 
+        {
+          protocol: "http",
+          path: "/foobar",
+          host: "127.0.0.1",
+          port: "9000"
+        }
+      ]
+    }
+  ]
 ```
+
+If for a server there are no `reverse_hosts` defined, a regular nginx
+server with the document root being in `/var/www/{{ domain_name}}` is 
+configured.
 
