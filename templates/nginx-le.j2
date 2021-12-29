@@ -33,9 +33,9 @@ server {
     ssl_dhparam /etc/nginx/dhparams.pem;
     ssl_prefer_server_ciphers on;
 
-{% if nginx_host.reverse_proxy is true %}
+{% if nginx_host.reverse_hosts is defined and nginx_host.reverse_hosts|length > 0 %}
     {% for proxy in nginx_host.reverse_hosts %}
-    location /{{ proxy.path }} {
+    location {{ proxy.path }} {
       proxy_pass {{ proxy.protocol }}://{{ proxy.host }}:{{ proxy.port }};
     }
     {% endfor %}
