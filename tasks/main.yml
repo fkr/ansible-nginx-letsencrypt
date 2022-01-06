@@ -8,6 +8,11 @@
   apt:
     name: letsencrypt
     state: latest
+- name: install apache2-utils
+  apt:
+    name: apache2-utils
+    state: latest
+  when: nginx_hosts|selectattr('users')|length > 0
 - name: create letsencrypt directory
   file:
     name: /var/www/letsencrypt
@@ -62,3 +67,9 @@
    job: letsencrypt --renew certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ domain_name }}" && service nginx reload
   loop: "{{ nginx_hosts | map(attribute='domain_name') }}"
   when: not nginx_single_cert
+- name: install users file
+  template:
+    src: users.j2
+    dest: /etc/nginx/{{item.domain_name}}.htpasswd
+  loop: "{{ nginx_hosts }}"
+  when: nginx_hosts|selectattr('users')|length > 0
