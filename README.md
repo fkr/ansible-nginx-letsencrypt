@@ -60,3 +60,33 @@ If for a server there are no `reverse_hosts` defined, a regular nginx
 server with the document root being in `/var/www/{{ domain_name}}` is 
 configured.
 
+### Basic Auth
+
+If basic auth is wanted for the server, adding the `users` variable will
+enable this:
+
+```
+ nginx_letsencrypt_email: "le@example.com"
+  nginx_hosts: [
+    {
+      default: true,
+      domain_name: "abcde.example.com",
+	  users: [ "username:password", "seconduser:password" ],
+      reverse_hosts: [ 
+        {
+          protocol: "http",
+          path: "",
+          host: "127.0.0.1",
+          port: "8080"
+        },
+        {
+          protocol: "http",
+          path: "/foo",
+          host: "127.0.0.1",
+          port: "8090"
+        }
+      ]
+    }
+ ]
+```
+
