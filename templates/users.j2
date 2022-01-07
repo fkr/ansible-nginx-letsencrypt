@@ -1,4 +1,4 @@
-{% for user in users %}
-{% set u = users.split(':') %}
-  {{ u[0] }}: {{ u[1] | password_hash('md5') }}
+{% for user in item.users %}
+{% set u = user.split(':') %}
+{{ u[0] }}:{{ u[1] | password_hash('md5','Wusoh6oo') }}
 {% endfor %}
