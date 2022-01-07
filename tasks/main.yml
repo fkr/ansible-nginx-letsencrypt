@@ -8,11 +8,6 @@
   apt:
     name: letsencrypt
     state: latest
-- name: install apache2-utils
-  apt:
-    name: apache2-utils
-    state: latest
-  when: nginx_hosts|selectattr('users','defined')
 - name: create letsencrypt directory
   file:
     name: /var/www/letsencrypt
