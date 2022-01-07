@@ -12,7 +12,7 @@
   apt:
     name: apache2-utils
     state: latest
-  when: nginx_hosts|selectattr('users')|length > 0
+  when: nginx_hosts|selectattr('users','defined')
 - name: create letsencrypt directory
   file:
     name: /var/www/letsencrypt
@@ -71,5 +71,5 @@
   template:
     src: users.j2
     dest: /etc/nginx/{{item.domain_name}}.htpasswd
-  loop: "{{ nginx_hosts }}"
-  when: nginx_hosts|selectattr('users')|length > 0
+  loop: "{{ nginx_hosts|selectattr('users','defined') }}"
+  when: nginx_hosts|selectattr('users','defined')
