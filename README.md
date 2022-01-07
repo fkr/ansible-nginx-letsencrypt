@@ -71,7 +71,7 @@ enable this:
     {
       default: true,
       domain_name: "abcde.example.com",
-	  users: [ "username:password", "seconduser:password" ],
+      users: [ "username:password", "seconduser:password" ],
       reverse_hosts: [ 
         {
           protocol: "http",
