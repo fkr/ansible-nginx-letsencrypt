@@ -2,7 +2,7 @@ server_tokens off;
 
 server {
     listen 80 default_server;
-    server_name {{ domain_name }};
+    server_name {% for nginx_host in nginx_hosts %}{{ nginx_host.domain_name }} {% endfor %};
 
     location /.well-known/acme-challenge {
         root /var/www/letsencrypt;
@@ -10,7 +10,7 @@ server {
     }
 
     location / {
-        rewrite ^ https://{{ domain_name }}$request_uri? permanent;
+        rewrite ^ https://$host$request_uri? permanent;
     }
 }
 

@@ -6,14 +6,21 @@ add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsaf
 
 # HTTPS server
 #
-server {
-    listen 443 ssl default deferred;
-    server_name {{ domain_name }};
 
-    ssl on;
-    ssl_certificate         /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem;
-    ssl_certificate_key     /etc/letsencrypt/live/{{ domain_name }}/privkey.pem;
-    ssl_trusted_certificate /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem;
+{% for nginx_host in nginx_hosts %}
+server {
+    listen 0.0.0.0:443 ssl{% if nginx_host.default is defined and nginx_host.default is sameas true %} default{% endif %};
+    server_name {{ nginx_host.domain_name }};
+
+{% if nginx_single_cert is defined and nginx_single_cert is sameas true %}
+    ssl_certificate         /etc/letsencrypt/live/{{ nginx_hosts | map(attribute='domain_name') | first }}/fullchain.pem;
+    ssl_certificate_key     /etc/letsencrypt/live/{{ nginx_hosts | map(attribute='domain_name') | first }}/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/{{ nginx_hosts | map(attribute='domain_name') | first }}/fullchain.pem;
+{% else %}
+    ssl_certificate         /etc/letsencrypt/live/{{ nginx_host.domain_name }}/fullchain.pem;
+    ssl_certificate_key     /etc/letsencrypt/live/{{ nginx_host.domain_name }}/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/{{ nginx_host.domain_name }}/fullchain.pem;
+{% endif %}
 
     ssl_session_cache shared:SSL:50m;
     ssl_session_timeout 5m;
@@ -26,12 +33,14 @@ server {
     ssl_dhparam /etc/nginx/dhparams.pem;
     ssl_prefer_server_ciphers on;
 
-{% if reverse_proxy is true %}
-	location /{{ proxy_path }} {
-          proxy_pass http://{{ backend_server }}:{{ backend_server_port }};
+{% if nginx_host.reverse_hosts is defined and nginx_host.reverse_hosts|length > 0 %}
+    {% for proxy in nginx_host.reverse_hosts %}
+    location {{ proxy.path }} {
+      proxy_pass {{ proxy.protocol }}://{{ proxy.host }}:{{ proxy.port }};
     }
+    {% endfor %}
 {% else %}
-    root /var/www/{{ domain_name }};
+    root /var/www/{{ nginx_host.domain_name }};
     index index.html index.htm;
 
     location / {
@@ -39,3 +48,4 @@ server {
     }
 {% endif %}
 }
+{% endfor %}
