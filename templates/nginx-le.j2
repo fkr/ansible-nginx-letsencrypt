@@ -11,16 +11,16 @@ add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsaf
 server {
     listen 0.0.0.0:443 ssl{% if nginx_host.default is defined and nginx_host.default is sameas true %} default{% endif %};
     server_name {{ nginx_host.domain_name }};
-{% if nginx_satisfy is not sameas none %}
-    satisfy {{ nginx_satisfy }};
+{% if nginx_host.nginx_satisfy is defined and nginx_host.nginx_satisfy is not sameas none %}
+    satisfy {{ nginx_host.nginx_satisfy }};
 {% endif %}
-{% if nginx_allow is defined and nginx_allow|length > 0 %}
-   {% for nginx_allowed in nginx_allow %}
+{% if nginx_host.nginx_allow is defined and nginx_host.nginx_allow|length > 0 %}
+   {% for nginx_allowed in nginx_host.nginx_allow %}
    allow {{ nginx_allowed }};
    {% endfor %}
 {% endif %}
-{% if nginx_deny is defined and nginx_deny|length > 0 %}
-   {% for nginx_denied in nginx_deny %}
+{% if nginx_host.nginx_deny is defined and nginx_host.nginx_deny|length > 0 %}
+   {% for nginx_denied in nginx_host.nginx_deny %}
    deny {{ nginx_denied }};
    {% endfor %}
 {% endif %}
