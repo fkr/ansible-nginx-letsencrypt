@@ -29,7 +29,7 @@
     name: nginx
     state: restarted
 - name: Create letsencrypt combined certificate
-  shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ nginx_hosts | map(attribute='domain_name') | join(',')  }}"
+  shell: letsencrypt certonly -n --renew-with-new-domains --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ nginx_hosts | map(attribute='domain_name') | join(',')  }}"
   args:
    creates: "/etc/letsencrypt/live/{{ nginx_hosts | map(attribute='domain_name') | first }}"
   when: nginx_single_cert
