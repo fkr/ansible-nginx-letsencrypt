@@ -56,7 +56,7 @@ server {
     location {{ proxy.path }} {
       proxy_pass {{ proxy.protocol }}://{{ proxy.host }}:{{ proxy.port }};
 	  {% if proxy.extra is defined %}
-	   {{ proxy.extra }};
+	   {{ proxy.extra }}
 	  {% endif %}
     }
     {% endfor %}
