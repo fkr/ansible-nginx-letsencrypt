@@ -4,10 +4,12 @@ server {
     listen 80 default_server;
     server_name {% for nginx_host in nginx_hosts %}{{ nginx_host.domain_name }} {% endfor %};
 
+{%-  if nginx_letsencrypt_enabled %}
     location /.well-known/acme-challenge {
         root /var/www/letsencrypt;
         try_files $uri $uri/ =404;
     }
+{%- endif %}
 
     location / {
         rewrite ^ https://$host$request_uri? permanent;

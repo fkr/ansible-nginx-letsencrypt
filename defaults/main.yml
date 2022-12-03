@@ -1,4 +1,6 @@
 --- 
 
+nginx_letsencrypt_enabled: false
+nginx_letsencrypt_single_cert: true
+nginx_self_signed_certs: false
 nginx_letsencrypt_email: foo@example.com
-nginx_single_cert: true

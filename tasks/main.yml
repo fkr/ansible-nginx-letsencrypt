@@ -37,12 +37,12 @@
 
 - name: nginx | Create letsencrypt combined certificate
   shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ nginx_hosts | map(attribute='domain_name') | join(',')  }}" --renew-with-new-domains --cert-name "{{ nginx_hosts | map(attribute='domain_name') | first }}"
-  when: nginx_single_cert
+  when: nginx_letsencrypt_single_cert and nginx_letsencrypt_enabled
 
 - name: nginx | Create letsencrypt standalone certificate
   shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ item }}" --cert-name "{{ nginx_hosts | map(attribute='domain_name') }}"
   loop: "{{ nginx_hosts | map(attribute='domain_name') }}"
-  when: not nginx_single_cert
+  when: not nginx_letsencrypt_single_cert and nginx_letsencrypt_enabled
 
 - name: nginx | Generate dhparams
   shell: openssl dhparam -out /etc/nginx/dhparams.pem 2048
@@ -61,7 +61,7 @@
    name: letsencrypt_renewal
    special_time: weekly
    job: letsencrypt --renew certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ nginx_hosts | map(attribute='domain_name') | join(',') }}" && service nginx reload
-  when: nginx_single_cert
+  when: nginx_letsencrypt_single_cert and nginx_letsencrypt_enabled
 
 - name: nginx | Add letsencrypt cronjob for standalone cert renewal
   cron:
@@ -69,7 +69,7 @@
    special_time: weekly
    job: letsencrypt --renew certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ domain_name }}" && service nginx reload
   loop: "{{ nginx_hosts | map(attribute='domain_name') }}"
-  when: not nginx_single_cert
+  when: not nginx_letsencrypt_single_cert and nginx_letsencrypt_enabled
 
 - name: nginx | install users file
   template:
