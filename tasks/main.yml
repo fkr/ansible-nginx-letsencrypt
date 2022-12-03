@@ -1,60 +1,60 @@
 --- 
 
-- name: Install nginx
+- name: nginx | Install nginx
   apt:
     name: nginx
     state: latest
 
-- name: install letsencrypt
+- name: nginx | install letsencrypt
   apt:
     name: letsencrypt
     state: latest
 
-- name: create letsencrypt directory
+- name: nginx | create letsencrypt directory
   file:
     name: /var/www/letsencrypt
     state: directory
 
-- name: Remove default nginx config
+- name: nginx | Remove default nginx config
   file: 
     name: /etc/nginx/sites-enabled/default
     state: absent
 
-- name: Install system nginx config
+- name: nginx | Install system nginx config
   template:
     src: nginx.conf.j2
     dest: /etc/nginx/nginx.conf
 
-- name: Install nginx site for letsencrypt requests
+- name: nginx | Install nginx site for letsencrypt requests
   template:
     src: nginx-http.j2
     dest: /etc/nginx/sites-enabled/http
 
-- name: Reload nginx to activate letsencrypt site
+- name: nginx | Reload nginx to activate letsencrypt site
   service:
     name: nginx
     state: restarted
 
-- name: Create letsencrypt combined certificate
+- name: nginx | Create letsencrypt combined certificate
   shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ nginx_hosts | map(attribute='domain_name') | join(',')  }}" --renew-with-new-domains --cert-name "{{ nginx_hosts | map(attribute='domain_name') | first }}"
   when: nginx_single_cert
 
-- name: Create letsencrypt standalone certificate
+- name: nginx | Create letsencrypt standalone certificate
   shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ item }}" --cert-name "{{ nginx_hosts | map(attribute='domain_name') }}"
   loop: "{{ nginx_hosts | map(attribute='domain_name') }}"
   when: not nginx_single_cert
 
-- name: Generate dhparams
+- name: nginx | Generate dhparams
   shell: openssl dhparam -out /etc/nginx/dhparams.pem 2048
   args:
     creates: /etc/nginx/dhparams.pem
 
-- name: Install nginx site for specified site
+- name: nginx | Install nginx site for specified site
   template:
     src: nginx-le.j2
     dest: /etc/nginx/sites-enabled/le
 
-- name: Reload nginx to activate specified site
+- name: nginx | Reload nginx to activate specified site
   service: name=nginx state=restarted
 - name: Add letsencrypt cronjob for combined cert renewal
   cron:
@@ -63,7 +63,7 @@
    job: letsencrypt --renew certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ nginx_hosts | map(attribute='domain_name') | join(',') }}" && service nginx reload
   when: nginx_single_cert
 
-- name: Add letsencrypt cronjob for standalone cert renewal
+- name: nginx | Add letsencrypt cronjob for standalone cert renewal
   cron:
    name: letsencrypt_renewal
    special_time: weekly
@@ -71,7 +71,7 @@
   loop: "{{ nginx_hosts | map(attribute='domain_name') }}"
   when: not nginx_single_cert
 
-- name: install users file
+- name: nginx | install users file
   template:
     src: users.j2
     dest: /etc/nginx/{{item.domain_name}}.htpasswd
