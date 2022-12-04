@@ -30,7 +30,12 @@ server {
     auth_basic_user_file /etc/nginx/{{ nginx_host.domain_name }}.htpasswd;
 {% endif %}
 
-{% if nginx_letsencrypt_enabled sameas true %}
+{% if nginx_selfsigned_enabled is sameas true %}
+   ssl_certificate      /etc/nginx/tls/{{ nginx_host.domain_name }}-certificate.pem;
+   ssl_certificate_key  /etc/nginx/tls/certificate.key;
+{% endif %}
+
+{% if nginx_letsencrypt_enabled is sameas true %}
 {% if nginx_letsencrypt_single_cert is sameas true %}
     ssl_certificate         /etc/letsencrypt/live/{{ nginx_hosts | map(attribute='domain_name') | first }}/fullchain.pem;
     ssl_certificate_key     /etc/letsencrypt/live/{{ nginx_hosts | map(attribute='domain_name') | first }}/privkey.pem;

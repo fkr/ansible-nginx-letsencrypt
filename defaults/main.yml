@@ -1,6 +1,8 @@
 --- 
 
+nginx_config_directory: "/etc/nginx"
 nginx_letsencrypt_enabled: false
 nginx_letsencrypt_single_cert: true
-nginx_self_signed_certs: false
+nginx_selfsigned_enabled: false
+nginx_selfsigned_org_name: "Example inc"
 nginx_letsencrypt_email: foo@example.com

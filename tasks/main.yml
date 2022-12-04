@@ -1,5 +1,21 @@
 --- 
 
+- name: nginx | ensure nginx_letsencrypt_enabled is false
+  assert:
+    that:
+      - nginx_letsencrypt_enabled is false
+    fail_msg: variable nginx_letsencrypt_enabled should be false if nginx_selfsigned_enabled is true
+    success_msg: nginx_letsencrypt_enabled is properly set to false
+  when: nginx_selfsigned_enabled is true
+
+- name: nginx | ensure nginx_selfsigned_enabled is false
+  assert:
+    that:
+      - nginx_selfsigned_enabled is false
+    fail_msg: variable nginx_selfsigned_enabled should be false if nginx_selfsigned_enabled is true
+    success_msg: nginx_selfsigned_enabled is properly set to false
+  when: nginx_letsencrypt_enabled is true
+
 - name: nginx | Install nginx
   apt:
     name: nginx
@@ -9,11 +25,24 @@
   apt:
     name: letsencrypt
     state: latest
+  when: nginx_letsencrypt_enabled
+
+- name: nginx | create needed directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0777
+  with_items:
+    - "{{ nginx_config_directory }}/tls"
+  when: nginx_selfsigned_enabled
 
 - name: nginx | create letsencrypt directory
   file:
     name: /var/www/letsencrypt
     state: directory
+  when: nginx_letsencrypt_enabled
 
 - name: nginx | Remove default nginx config
   file: 
@@ -24,6 +53,18 @@
   template:
     src: nginx.conf.j2
     dest: /etc/nginx/nginx.conf
+
+- name: nginx | Create private key (RSA, 4096 bits)
+  community.crypto.openssl_privatekey:
+    path: "{{ nginx_config_directory }}/tls/certificate.key"
+  when: nginx_selfsigned_enabled
+
+- name: nginx | Create selfsigned certs per host
+  include_tasks: selfsigned.yml
+  loop: "{{ nginx_hosts | map(attribute='domain_name') }}"
+  loop_control:
+    loop_var: nginx_host
+  when: nginx_selfsigned_enabled
 
 - name: nginx | Install nginx site for letsencrypt requests
   template:

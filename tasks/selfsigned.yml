@@ -1,0 +1,16 @@
+---
+
+- name: nginx | Create certificate signing request (CSR) for self-signed certificate
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: "{{ nginx_config_directory }}/tls/certificate.key"
+    common_name: "{{ nginx_host }}"
+    organization_name: "{{ nginx_selfsigned_org_name }}"
+  register: csr
+
+- name: nginx | Create self-signed certificate
+  community.crypto.x509_certificate:
+    path: "{{ nginx_config_directory }}/tls/{{ nginx_host }}-certificate.pem"
+    csr_content: "{{ csr.csr }}"
+    privatekey_path: "{{ nginx_config_directory }}/tls/certificate.key"
+    provider: selfsigned
+
