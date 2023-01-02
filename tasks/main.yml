@@ -16,6 +16,22 @@
     success_msg: nginx_selfsigned_enabled is properly set to false
   when: nginx_letsencrypt_enabled is true
 
+- name: nginx | ensure nginx_letsencrypt_enabled is true
+  assert:
+    that:
+      - nginx_letsencrypt_enabled is true
+    fail_msg: variable nginx_letsencrypt_enabled should be false if nginx_selfsigned_enabled is true
+    success_msg: nginx_letsencrypt_enabled is properly set to false
+  when: nginx_selfsigned_enabled is false
+
+- name: nginx | ensure nginx_selfsigned_enabled is true
+  assert:
+    that:
+      - nginx_selfsigned_enabled is true
+    fail_msg: variable nginx_selfsigned_enabled should be false if nginx_selfsigned_enabled is true
+    success_msg: nginx_selfsigned_enabled is properly set to false
+  when: nginx_letsencrypt_enabled is false
+
 - name: nginx | Install nginx
   apt:
     name: nginx
