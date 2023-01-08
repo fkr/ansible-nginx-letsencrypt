@@ -117,14 +117,14 @@
   cron:
    name: letsencrypt_renewal
    special_time: weekly
-   job: certbot certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ nginx_hosts | map(attribute='domain_name') | join(',') }}" && service nginx reload
+   job: /usr/bin/certbot certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ nginx_hosts | map(attribute='domain_name') | join(',') }}" && /usr/sbin/service nginx reload
   when: nginx_letsencrypt_single_cert and nginx_letsencrypt_enabled
 
 - name: nginx | Add letsencrypt cronjob for standalone cert renewal
   cron:
    name: letsencrypt_renewal
    special_time: weekly
-   job: certbot certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ domain_name }}" && service nginx reload
+   job: /usr/bin/certbot certonly -n --webroot -w /var/www/letsencrypt -m {{ nginx_letsencrypt_email }} --agree-tos -d "{{ domain_name }}" && /usr/sbin/service nginx reload
   loop: "{{ nginx_hosts | map(attribute='domain_name') }}"
   when: not nginx_letsencrypt_single_cert and nginx_letsencrypt_enabled
 
